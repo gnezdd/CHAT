@@ -7,7 +7,7 @@
 
 bool GroupModel::createGroup(Group &group) {
     char sql[1024] = {0};
-    sprintf(sql,"insert into allgroup(groupname,groupdesc) values('%s','%s')",
+    sprintf(sql,"insert into allgroup(groupname,groupdescpt) values('%s','%s')",
             group.getName().c_str(),group.getDesc().c_str());
     MySQL mysql;
     if (mysql.connect()) {
@@ -31,7 +31,7 @@ void GroupModel::addGroup(int userid, int groupid, string role) {
 
 vector<Group> GroupModel::queryGroups(int userid) {
     char sql[1024] = {0};
-    sprintf(sql,"select a.id,a.groupname,a.groupdesc from allgroup a inner join groupuser b on a.id = b.groupid where b.userid = %d",userid);
+    sprintf(sql,"select a.id,a.groupname,a.groupdescpt from allgroup a inner join groupuser b on a.id = b.groupid where b.userid = %d",userid);
 
     vector<Group> groups;
 
