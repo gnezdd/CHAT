@@ -16,12 +16,21 @@ void restHandler(int) {
     exit(0);
 }
 
-int main() {
+int main(int argc, char **argv) {
+
+    if (argc < 3) {
+        cerr << "command invalid! example: ./ChatServer 127.0.0.1 6000" << endl;
+        exit(-1);
+    }
+
+    // 解析通过命令行参数传递的ip和port
+    char *ip = argv[1];
+    uint16_t port = atoi(argv[2]);
 
     signal(SIGINT,restHandler);
 
     EventLoop loop;
-    InetAddress addr("127.0.0.1",8000);
+    InetAddress addr(ip,port);
     ChatServer server(&loop,addr,"ChatServer");
 
     server.start();
