@@ -9,7 +9,7 @@
 using namespace std;
 
 Redis::Redis()
-        : publishContext_(nullptr), subcribeContext_(nullptr)
+        : publishContext_(nullptr), subcribeContext_(nullptr), seqContext_(nullptr)
 {
 }
 
@@ -23,6 +23,10 @@ Redis::~Redis()
     if (subcribeContext_ != nullptr)
     {
         redisFree(subcribeContext_);
+    }
+
+    if (seqContext_ != nullptr) {
+        redisFree(seqContext_);
     }
 }
 
@@ -39,6 +43,13 @@ bool Redis::connect()
     // 负责subscribe订阅消息的上下文连接
     subcribeContext_ = redisConnect("127.0.0.1", 6379);
     if (nullptr == subcribeContext_)
+    {
+        cerr << "connect redis failed!" << endl;
+        return false;
+    }
+
+    seqContext_ = redisConnect("127.0.0.1", 6379);
+    if (nullptr == seqContext_)
     {
         cerr << "connect redis failed!" << endl;
         return false;
@@ -137,4 +148,30 @@ void Redis::observerChannelMessage ()
 void Redis::initNotifyHandler (function<void(int,string)> fn)
 {
     this->notifyMessageHandler_ = fn;
+}
+
+int Redis::getSeq(string channel) {
+    redisReply *reply = (redisReply*) redisCommand(seqContext_,"INCR %s",channel.c_str());
+    if (reply == nullptr) {
+        cerr << "getSeq failed" << endl;
+        return -1;
+    }
+    int seq = reply->integer;
+    freeReplyObject(reply);
+    return seq;
+}
+
+int Redis::getAck(string channel) {
+    redisReply *reply = (redisReply*) redisCommand(seqContext_,"get %s",channel.c_str());
+    if (reply == nullptr) {
+        cerr << "getAck failed" << endl;
+        return 0;
+    }
+    int ack = reply->integer;
+    freeReplyObject(reply);
+    return ack;
+}
+
+bool Redis::setAck(string channel, int ack) {
+    redisCommand(seqContext_,"set %s %d",channel.c_str(),ack);
 }

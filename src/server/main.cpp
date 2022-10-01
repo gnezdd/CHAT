@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
 
     EventLoop loop;
     InetAddress addr(ip,port);
-    ChatServer server(&loop,addr,"ChatServer");
+    ChatServer server(&loop,addr,"ChatServer",10);
 
     server.start();
     loop.loop();

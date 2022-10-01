@@ -31,6 +31,16 @@ public:
     // 在独立线程中接收订阅通道中的消息
     void observerChannelMessage();
 
+    // 获取序列号 一对一 seq:fromid+to+toid
+    // 群聊 seq:group+id
+    int getSeq(string channel);
+
+    // ack:fromid+to+toid
+    // ack:group+id+to+toid
+    int getAck(string channel);
+
+    bool setAck(string channel,int ack);
+
     // 初始化向业务层上报通道消息的回调对象
     void initNotifyHandler(function<void(int,string)> fn);
 
@@ -40,6 +50,10 @@ private:
     redisContext *publishContext_;
     // subscribe消息
     redisContext *subcribeContext_;
+
+    // 序列号
+    redisContext *seqContext_;
+
     // 回调操作 收到订阅的消息 给service层上报
     function<void(int,string)> notifyMessageHandler_;
 };
